@@ -2,7 +2,6 @@
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_microsoft_teams_suppression.dart';
 
@@ -52,48 +51,63 @@ Future<T> tracedMicrosoftTeams<T>({
   final t = tracer ?? OTel.tracerProvider().getTracer('otel_microsoft_teams');
   final span = t.startSpan('teams $operation', kind: SpanKind.client);
   try {
-    span.setStringAttribute('rpc.system', 'ms_teams');
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('rpc.system', 'ms_teams')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.tenantId != null) {
-        span.setStringAttribute('microsoft.tenant.id', res.tenantId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('microsoft.tenant.id', res.tenantId!)]));
       }
       if (res.teamId != null) {
-        span.setStringAttribute('microsoft.teams.team.id', res.teamId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('microsoft.teams.team.id', res.teamId!)]));
       }
       if (res.channelId != null) {
-        span.setStringAttribute('microsoft.teams.channel.id', res.channelId!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('microsoft.teams.channel.id', res.channelId!)
+        ]));
       }
       if (res.chatId != null) {
-        span.setStringAttribute('microsoft.teams.chat.id', res.chatId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('microsoft.teams.chat.id', res.chatId!)]));
       }
       if (res.messageId != null) {
-        span.setStringAttribute('microsoft.teams.message.id', res.messageId!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('microsoft.teams.message.id', res.messageId!)
+        ]));
       }
       if (res.userId != null) {
-        span.setStringAttribute('user.id', res.userId!);
+        span.addAttributes(
+            OTel.attributes([OTel.attributeString('user.id', res.userId!)]));
       }
       if (res.meetingId != null) {
-        span.setStringAttribute('microsoft.teams.meeting.id', res.meetingId!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('microsoft.teams.meeting.id', res.meetingId!)
+        ]));
       }
       if (res.appId != null) {
-        span.setStringAttribute('microsoft.teams.app.id', res.appId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('microsoft.teams.app.id', res.appId!)]));
       }
       if (res.statusCode != null) {
-        span.setIntAttribute('http.response.status_code', res.statusCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
       }
       if (res.errorCode != null) {
-        span.setStringAttribute('teams.error.code', res.errorCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('teams.error.code', res.errorCode!)]));
       }
-      final fail =
-          res.errorCode != null ||
+      final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.setStringAttribute(
-          ErrorResource.errorType.key,
-          res.errorCode ?? 'teams.error',
-        );
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+            ErrorResource.errorType.key,
+            res.errorCode ?? 'teams.error',
+          )
+        ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
     }
